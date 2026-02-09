@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>TÀI XỈU CASINO PRO</title>
+
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,Arial}
+body{
+    margin:0;
+    background:radial-gradient(circle at top,#0ff2,#000 60%);
+    color:#0ff;
+    overflow:hidden;
+}
+header{
+    height:60px;
+    border-bottom:2px solid #0ff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    font-weight:bold;
+    text-shadow:0 0 10px #0ff;
+}
+.container{
+    display:grid;
+    grid-template-columns:1fr 350px;
+    height:calc(100vh - 60px);
+}
+.game{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.table{
+    text-align:center;
+}
+.bowl{
+    width:200px;
+    height:60px;
+    background:#999;
+    border-radius:50%;
+    margin:auto;
+    box-shadow:0 0 30px #0ff5 inset;
+}
+.dice-area{
+    margin:20px 0;
+    font-size:50px;
+}
+.btn{
+    padding:10px 25px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.btn-lac{background:gold}
+.btn-tai{background:#00ff99}
+.btn-xiu{background:#ff0055}
+.btn:hover{transform:scale(1.05)}
+
+.panel{
+    border-left:2px solid #0ff;
+    padding:10px;
+    display:grid;
+    grid-template-rows:80px 1fr 1fr;
+    gap:10px;
+}
+.box{
+    border:2px solid #0ff;
+    padding:10px;
+    box-shadow:0 0 15px #0ff5 inset;
+}
+.log{
+    font-size:13px;
+    line-height:1.5;
+    color:#fff;
+    overflow:auto;
+}
+.fake{
+    color:#0f0;
+}
+.history span{
+    margin-right:5px;
+}
+.shake{
+    animation:shake 0.5s infinite;
+}
+@keyframes shake{
+    0%{transform:translate(0,0)}
+    25%{transform:translate(5px,-5px)}
+    50%{transform:translate(-5px,5px)}
+    75%{transform:translate(5px,5px)}
+    100%{transform:translate(0,0)}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>🎲 TÀI XỈU CASINO PRO</div>
+    <div>🌐 Online: <span id="online">132</span></div>
+</header>
+
+<div class="container">
+    <div class="game">
+        <div class="table">
+            <div class="bowl" id="bowl"></div>
+            <div class="dice-area" id="dice">🎲 🎲 🎲</div>
+            <div id="sum">---</div>
+            <br>
+            <button class="btn btn-lac" onclick="shakeBowl()">LẮC TÔ</button>
+            <br><br>
+            <button class="btn btn-tai" onclick="bet('tai')">TÀI</button>
+            <button class="btn btn-xiu" onclick="bet('xiu')">XỈU</button>
+            <p id="status">Nhấn LẮC TÔ để bắt đầu</p>
+            <p>💰 Điểm: <span id="coin">100</span></p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="box">
+            <b>LỊCH SỬ</b>
+            <div class="history" id="history"></div>
+        </div>
+
+        <div class="box">
+            <b>SERVER LOG</b>
+            <div class="log" id="log"></div>
+        </div>
+
+        <div class="box">
+            <b>FAKE CHAT</b>
+            <div class="log" id="chat"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let coin=100
+let choice=null
+let rolling=false
+
+const diceIcons=["⚀","⚁","⚂","⚃","⚄","⚅"]
+
+function bet(type){
+    if(rolling) return
+    choice=type
+    document.getElementById("status").innerText="Đã chọn: "+type.toUpperCase()
+}
+
+function shakeBowl(){
+    if(!choice){
+        alert("Chọn TÀI hoặc XỈU trước!")
+        return
+    }
+    if(rolling) return
+    rolling=true
+
+    const bowl=document.getElementById("bowl")
+    bowl.classList.add("shake")
+    document.getElementById("status").innerText="Đang lắc..."
+
+    setTimeout(()=>{
+        bowl.classList.remove("shake")
+
+        // 🎲 BỊP TỈ LỆ (NHÀ CÁI WIN)
+        let d1,d2,d3,sum
+        if(Math.random()<0.65){ // 65% nhà win
+            if(choice=="tai"){
+                sum = Math.floor(Math.random()*5)+4  // 4-8 (xỉu)
+            }else{
+                sum = Math.floor(Math.random()*5)+11 // 11-15 (tài)
+            }
+        }else{
+            if(choice=="tai"){
+                sum = Math.floor(Math.random()*5)+11
+            }else{
+                sum = Math.floor(Math.random()*5)+4
+            }
+        }
+
+        // tách thành 3 xúc xắc
+        do{
+            d1=Math.floor(Math.random()*6)+1
+            d2=Math.floor(Math.random()*6)+1
+            d3=Math.floor(Math.random()*6)+1
+        }while(d1+d2+d3!=sum)
+
+        document.getElementById("dice").innerText=
+            diceIcons[d1-1]+" "+diceIcons[d2-1]+" "+diceIcons[d3-1]
+        document.getElementById("sum").innerText="Tổng: "+sum
+
+        let result = sum>=11 ? "tai" : "xiu"
+
+        if(result==choice){
+            coin+=10
+            document.getElementById("status").innerText="🎉 THẮNG!"
+        }else{
+            coin-=10
+            document.getElementById("status").innerText="💀 THUA!"
+        }
+
+        document.getElementById("coin").innerText=coin
+
+        // history
+        const h=document.getElementById("history")
+        const sp=document.createElement("span")
+        sp.innerText=result.toUpperCase()
+        sp.style.color=result=="tai"?"#0f0":"#f00"
+        h.prepend(sp)
+
+        addLog(result)
+        rolling=false
+    },2000)
+}
+
+/* FAKE SERVER */
+const names=["Dragon","Shadow","King","Ghost","Demon","Tiger","Wolf","Zero"]
+function addLog(res){
+    const log=document.getElementById("log")
+    let name=names[Math.floor(Math.random()*names.length)]
+    let txt = `${name} ${res=="tai"?"thua":"thắng"} 10 điểm`
+    let div=document.createElement("div")
+    div.innerText="• "+txt
+    log.prepend(div)
+}
+
+/* FAKE CHAT */
+setInterval(()=>{
+    const chat=document.getElementById("chat")
+    let name=names[Math.floor(Math.random()*names.length)]
+    let msg=["ảo vl","bịp à","thua sấp mặt","ăn đậm","đỏ vc","casino uy tín 😏"]
+    let div=document.createElement("div")
+    div.innerText=name+": "+msg[Math.floor(Math.random()*msg.length)]
+    chat.prepend(div)
+},2000)
+
+/* FAKE ONLINE */
+setInterval(()=>{
+    document.getElementById("online").innerText=
+        120+Math.floor(Math.random()*50)
+},3000)
+</script>
+
+</body>
+</html>
